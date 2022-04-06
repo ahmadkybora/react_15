@@ -3,12 +3,17 @@ import { getProducts } from '../services/productService';
 import { useEffect, useState } from 'react';
 import http from '../services/http';
 import { Link } from "react-router-dom";
-import Modal from './modal';
+import Modal, { ModalEdit, ModalShow } from './modal';
+import { Img } from '../utils/tools';
+import baseUrl from "../baseUrl.json";
 
 // در فانکشنال کامپوننت میتوان به صورت زیر تابع را نوشت
 // و همچنین باید ایمپورت کرد کامپوننت و ری اکت را
 const Products = () => {
     const [products, setProducts] = useState()
+    const [productId, setProductId] = useState(1);
+    const modal = ["modalEdit", "modalShow"];
+
     useEffect(() => {
         getAllProducts()
     }, [])
@@ -23,7 +28,7 @@ const Products = () => {
 
     // البته بوسیله کد نامتقارن هم میتوان اینکار را انجام داد
     const getAllProducts = () => {
-        http.get("https://fakestoreapi.com/products")
+        http.get(baseUrl.baseUrl + "products")
             .then(res => setProducts(res.data))
             .catch(err => console.log(err))
     }
@@ -32,37 +37,20 @@ const Products = () => {
 
     const deleteProduct = async (id) => {
         setProducts(products.filter(p => p.id !== id));
-        await http.delete(`https://fakestoreapi.com/products/${id}`)
+        await http.delete(baseUrl.baseUrl + `products/${id}`)
             .then(res => setProducts(res.data))
             .catch(err => console.log(err));
     }
 
-    const editProduct = (p) => {
-        // return (
-        //     <div className="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        //         <div className="modal-dialog">
-        //             <div className="modal-content">
-        //             <div className="modal-header">
-        //                 <h5 className="modal-title" id="exampleModalLabel">Modal title</h5>
-        //                 <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        //             </div>
-        //             <div className="modal-body">
-        //                 <form>
-        //                     <input />
-        //                 </form>
-        //             </div>
-        //             <div className="modal-footer">
-        //                 <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        //                 <button type="button" className="btn btn-primary">Save changes</button>
-        //             </div>
-        //             </div>
-        //         </div>
-        //     </div>
-        // )
+    const showProduct = (id) => {
+        // console.log(id)
+        // setProductId(products.find(p => p.id === id))
     }
 
-    const modal = "modal"
-    const exampleModal = "exampleModal"
+    const editProduct = (id) => {
+        // setProductId(id)
+    }
+
     return (
         
         <div>
@@ -84,18 +72,42 @@ const Products = () => {
                             <td>{p.title.substring(1, 10)}</td>
                             <td>{p.price}</td>
                             <td>{p.description.substring(1, 50)}</td>
-                            <td><img src={p.image} width="50" className="rounded-circle" /></td>
+                            <td>
+                                <Img 
+                                    width="50" 
+                                    height="" 
+                                    className="image-rounded" 
+                                    value={p.image}
+                                />
+                            </td>
                             <td>
                                 <span>
                                     <i onClick={() => deleteProduct(p.id)} className='text-danger fa fa-trash'></i>
                                 </span>
                                 <span>
                                     <i 
-                                        onClick={() => editProduct(p)} 
+                                        onClick={() => editProduct(p.id)}
                                         className='text-primary fa fa-edit' 
                                         data-bs-toggle="modal" 
-                                        data-bs-target="#exampleModal" />
-                                        <Modal name="editModal" modal={modal} exampleModal={exampleModal} p={p}/>
+                                        data-bs-target="#editModal" />
+                                        <ModalEdit 
+                                            name="editModal" 
+                                            modal={modal["modalEdit"]} 
+                                            p={p.id}
+                                        />
+
+                                </span>
+                                <span>
+                                    <i 
+                                        onClick={() => showProduct(p.id)}
+                                        className='text-success fa fa-eye' 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#showModal" />
+                                        <ModalShow 
+                                            name="showModal" 
+                                            modal={modal["modalShow"]} 
+                                            p={p.id}
+                                        />
                                 </span>
                             </td>
                         </tr>
